@@ -1,0 +1,161 @@
+# Configuration shared by makeTauHists.py and plotting scripts
+
+# lists to loop over
+tauAlgos:
+  - DeepTau2018v2p5
+  # - PNet     # default in central production with min. VSjet & qConf cut !
+  # - UParT
+  - PNetCHS
+  - PNetPUPPI
+  - UParTPUPPI
+discriminants: [ VSjet, VSmu, VSe ]
+genmatches: [ real, muon, elec, jet ]
+
+# configuration for making Venn diagrams (maximum 3).
+venn:
+  algos:
+    - DeepTau2018v2p5
+    - PNetCHS
+    - UParTPUPPI
+  wps:
+    - VVVLoose
+    - Medium
+
+# baseline gen/reco selection cuts
+cut:
+  pt: 20.0    # pT cut in GeV
+  eta: 2.5    # |eta| cut
+  qConf: 0.2  # minimum charge assignment probability (tau like with charge -1 or +1)
+
+# histogram binning (nbins,xmin,xmax)
+binning:
+  raw:     [200, 0, 1]      # raw output score of discriminators
+  logit:   [1000, -10, 10]  # high granularity for efficiency measurement
+  ntau:    [2, 0 ,2]        # number of taus passing a selection
+  pt:      [50, 0, 250]
+  pt2:     [0, 20, 30, 50, 100, 400] # coarse variable binning
+  ptresp:  [80, 0, 2]
+  jptresp: [80, 0, 2]
+  qConf:   [100, -0.5, 0.5]
+  venn:    [2, 0, 2, 2, 0, 2, 2, 0, 2] # [False, True] in 3D
+  dm:      [14, -1, 13]     # reco DM bins
+  hpsdm:   [14, -1, 13]     # reco DM bins for HPS
+  gm:      [17, -1, 20]     # -1: no match, 15: other
+  gendm:   [17, -1, 16]     # -1: no match, 15: other
+
+# WP definition
+wp:
+  file:   "wps_$ALGO$TAG.yaml" # name convention
+  outdir: "output/wps" # default WP output directory
+  tag:    "_2024_hps3" # default WP tag for makeTauHists.py
+  cut:    "0.05" # default cut
+
+# target efficiencies per working point
+wp2eff_dicts:
+  VSe: { VVVLoose: 99.5, VVLoose: 99, VLoose: 98, Loose: 95, Medium: 90, Tight: 80, VTight: 70, VVTight: 60 }
+  VSmu: { VLoose: 99.95, Loose: 99.9, Medium: 99.8, Tight: 99.5 }
+  VSjet: { VVVLoose: 98, VVLoose: 95, VLoose: 90, Loose: 80, Medium: 70, Tight: 60, VTight: 50, VVTight: 40 }
+
+# configuration for making DM plots
+dm:
+  wps: # VSjet WPs to make DM plots for
+    - VVVLoose
+    - Medium
+  postfixes: # tau selections to use for DM plots
+    DeepTau*: [ hps, hps3 ]
+    '*':      [ hps, hps3, qlty ]
+  postfixes_wp: # tau selections to apply VSjet WPs
+    DeepTau*: [ hps ]
+    '*':      [ qlty ]
+  postfixes_gm: # tau selections to apply genmatches
+    DeepTau*: [ hps, hps3 ]
+    '*':      [ qlty, hps3 ]
+
+# filename tags that are more descriptive & human-readable
+tag:
+  all:  allAlgoPtCut        # union of all selections, but using algo-dependent pT cut
+  all2: allSamePtCut        # union of all selections, but using common pT cut
+  qlty: qltyCharge          # quality cuts on charge (no 2-prong for HPS; high qConf for PNet/UParT)
+  hps:  hpsIncl2Pr          # HPS taus, including 2-prong
+  hps2: hpsExcl2Pr          # HPS taus, excluding 2-prong
+  hps3: hpsExcl2PrPlusRecov # HPS taus, excluding 2-prong, but including taus recovered by PNet/UParT
+
+# titles for histograms and axes
+title:
+  ntau:      "Number of #tau_{h} candidates"
+  ngentau:   "Number of generated #tau_{h}"
+  dm:        "Reconstructed #tau_{h} decay mode"
+  gm:        "Match to generated particle"
+  hpsdm:     "HPS reconstructed #tau_{h} decay mode"
+  gendm:     "Generated #tau_{h} decay mode"
+  qConf:     "Charge assignment probability"
+  pt:        "Reconstructed #tau_{h} p_{T}"
+  ptres:     "p_{T} response"
+  ptres_hps: "HPS #tau_{h} p_{T} response"
+  ptres_rec: "Recovery #tau_{h} p_{T} response"
+
+# text labels in plots
+text:
+  algo: # tau reco + ID algorithm
+    DeepTau2018v2p5: "HPS+DeepTau v2.5"
+    PNetCHS:         "CHS+PNet"
+    PNetPUPPI:       "PUPPI+PNet"
+    UParTPUPPI:      "PUPPI+UParT v2"
+  recoAlgo: # reconstruction algorithm
+    'DeepTau*': "HPS"
+    '*CHS':     "CHS"
+    '*PUPPI':   "PUPPI"
+  regressAlgo: # regression algorithm
+    'DeepTau*': "HPS" # actually reconstruction algorithm
+    'PNet*':    "PNet"
+    'UParT*':   "UParT"
+  collection: # shorter description for axis titles
+    all: "p_{#lower[-0.15]{T}} > 20 GeV, |#eta| < 2.5, |d_{#lower[-0.15]{z}}| < 0.2 cm"
+    all_gen: "p_{#lower[-0.15]{T}}^{#lower[0.15]{gen}} > 20 GeV, |#eta^{#lower[0.15]{gen}}| < 2.5, |d_{#lower[-0.20]{z}}^{#lower[0.24]{gen}}| < 0.2 cm"
+    hps: "HPS (incl. reconstructed 2-prong DMs)"
+    hps2: "HPS w/o reconstructed 2-prong DMs"
+    hps3: "w/o 2-prong DMs, recovery w/ |qConf| > 0.2"
+    qConf: "PNet/UParT w/ |qConf| > 0.2"
+    qlty_hps: "w/o reconstructed 2-prong DMs"
+    qlty_jet: "|qConf| > 0.2" # PNet/UParT
+  selection: # multiline description for corner of plot
+    all:      "p_{#lower[-0.15]{T}} > 20 GeV, |#eta| < 2.5, |d_{#lower[-0.15]{z}}| < 0.2 cm"
+    all2:     "${all}"
+    all_gen:  "p_{#lower[-0.15]{T}}^{#lower[0.15]{gen}} > 20 GeV, |#eta^{#lower[0.15]{gen}}| < 2.5"
+    hps:      "${all}\nHPS (incl. reconstructed 2-prong DMs)"
+    hps2:     "${all}\nHPS w/o reconstructed 2-prong DMs"
+    hps3:     "${all}\nHPS w/o 2-prong DMs\nrecovery w/ |qConf| > 0.2"
+    hps_hps3: "${all}\nHPS taus w/o 2-prong DMs"
+    rec_hps3: "${all}\nRecovery taus w/ |qConf| > 0.2"
+    qlty:     "${all}\nHPS w/o 2-prong DMs\nrecovery w/ |qConf| > 0.2"
+    qlty_hps: "${all}\nw/o reconstructed 2-prong DMs"
+    qlty_jet: "${all}\n|qConf| > 0.2"
+  dm: # integer decay mode codes
+    0:  'h^{#pm}'
+    1:  'h^{#pm}#pi^{0}'
+    2:  'h^{#pm}#geq2#pi^{0}s'
+    5:  'h^{#pm}h^{#mp/#pm}'
+    6:  'h^{#pm}h^{#mp/#pm}#pi^{0}s'
+    10: 'h^{#pm}h^{#mp}h^{#pm}'
+    11: 'h^{#pm}h^{#mp}h^{#pm}#geq1#pi^{0}s'
+  gm: # genmatch labels
+    real: "genuine#kern[-.4]{ }#tau_{h}"
+    elec: "e#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau_{h}"   # e -> tau_h
+    muon: "#mu#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau_{h}" # mu -> tau_h
+    jet:  "jet#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau_{h}" # jet -> tau_h
+  GM: # genmatch labels capitalized
+    real: "Genuine#kern[-.4]{ }#tau_{h}"
+    elec: "e#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau_{h}"   # e -> tau_h
+    muon: "#mu#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau_{h}" # mu -> tau_h
+    jet:  "Jet#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau_{h}" # jet -> tau_h
+  gm_short: # for short axis labels
+    real: "#tau_{#lower[-0.08]{h}}"
+    elec: "e"
+    muon: "#mu"
+    jet:  "#lower[-0.05]{q/g}" # "q/g"
+  process:
+    TT:      "t#bar{t}"
+    DY:      "Drell#minusYan"
+    HTT:     "H#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau#tau"
+    Hto2Tau: "H#kern[-.25]{ #rightarrow}#kern[-.4]{ }#tau#tau"
+  

@@ -1,0 +1,9 @@
+# user output
+logs
+output
+plots
+
+# C++ dictionaries
+*.d
+*.so
+*.pcm
